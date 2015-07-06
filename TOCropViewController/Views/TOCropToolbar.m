@@ -32,7 +32,6 @@
 
 @property (nonatomic, strong) UIButton *rotateButton;
 @property (nonatomic, strong) UIButton *resetButton;
-@property (nonatomic, strong) UIButton *clampButton;
 
 - (void)setup;
 - (void)buttonTapped:(id)button;
@@ -41,7 +40,6 @@
 + (UIImage *)cancelImage;
 + (UIImage *)resetImage;
 + (UIImage *)rotateImage;
-+ (UIImage *)clampImage;
 
 @end
 
@@ -85,13 +83,6 @@
     [_cancelIconButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
     [self addSubview:_cancelIconButton];
     
-    _clampButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    _clampButton.contentMode = UIViewContentModeCenter;
-    _clampButton.tintColor = [UIColor whiteColor];
-    [_clampButton setImage:[TOCropToolbar clampImage] forState:UIControlStateNormal];
-    [_clampButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
-    [self addSubview:_clampButton];
-    
     _rotateButton = [UIButton buttonWithType:UIButtonTypeSystem];
     _rotateButton.contentMode = UIViewContentModeCenter;
     _rotateButton.tintColor = [UIColor whiteColor];
@@ -132,25 +123,22 @@
         frame.origin.x = boundsSize.width - CGRectGetWidth(frame);
         self.doneTextButton.frame = frame;
         
-        CGRect containerRect = (CGRect){0,0,165.0f,44.0f};
+        CGRect containerRect = (CGRect){0,0,110.0f,44.0f};
         containerRect.origin.x = (CGRectGetWidth(self.bounds) - (CGRectGetWidth(containerRect))) * 0.5f;
         
         CGRect buttonFrame = (CGRect){0,0,44.0f,44.0f};
         
         if (self.rotateButtonHidden) {
-            buttonFrame.origin.x = CGRectGetMinX(containerRect);
+            buttonFrame.origin.x = CGRectGetMidX(containerRect) - 22.0f;
             self.resetButton.frame = buttonFrame;
         }
         else {
             buttonFrame.origin.x = CGRectGetMinX(containerRect);
             self.rotateButton.frame = buttonFrame;
             
-            buttonFrame.origin.x = CGRectGetMidX(containerRect) -  22.0f;
+            buttonFrame.origin.x = CGRectGetMaxX(containerRect) - 44.0f;
             self.resetButton.frame = buttonFrame;
         }
-        
-        buttonFrame.origin.x = CGRectGetMaxX(containerRect) - 44.0f;
-        self.clampButton.frame = buttonFrame;
     }
     else {
         CGRect frame = CGRectZero;
@@ -164,25 +152,22 @@
         frame.size.height = 44.0f;
         self.doneIconButton.frame = frame;
         
-        CGRect containerRect = (CGRect){0,0,44.0f,165.0f};
+        CGRect containerRect = (CGRect){0,0,44.0f,110.0f};
         containerRect.origin.y = (CGRectGetHeight(self.bounds) - (CGRectGetHeight(containerRect))) * 0.5f;
         
         CGRect buttonFrame = (CGRect){0,0,44.0f,44.0f};
         
         if (self.rotateButtonHidden) {
-            buttonFrame.origin.y = CGRectGetMinY(containerRect);
+            buttonFrame.origin.y = CGRectGetMidY(containerRect) -  22.0f;
             self.resetButton.frame = buttonFrame;
         }
         else {
             buttonFrame.origin.y = CGRectGetMinY(containerRect);
             self.rotateButton.frame = buttonFrame;
             
-            buttonFrame.origin.y = CGRectGetMidY(containerRect) -  22.0f;
+            buttonFrame.origin.y = CGRectGetMaxY(containerRect) -  44.0f;
             self.resetButton.frame = buttonFrame;
         }
-
-        buttonFrame.origin.y = CGRectGetMaxY(containerRect) - 44.0f;
-        self.clampButton.frame = buttonFrame;
     }
 }
 
@@ -202,28 +187,6 @@
     else if (button == self.rotateButton && self.rotateButtonTapped) {
         self.rotateButtonTapped();
     }
-    else if (button == self.clampButton && self.clampButtonTapped) {
-        self.clampButtonTapped();
-        return;
-    }
-}
-
-- (CGRect)clampButtonFrame
-{
-    return self.clampButton.frame;
-}
-
-- (void)setClampButtonGlowing:(BOOL)clampButtonGlowing
-{
-    if (_clampButtonGlowing == clampButtonGlowing)
-        return;
-    
-    _clampButtonGlowing = clampButtonGlowing;
-    
-    if (_clampButtonGlowing)
-        self.clampButton.tintColor = nil;
-    else
-        self.clampButton.tintColor = [UIColor whiteColor];
 }
 
 - (void)setRotateButtonHidden:(BOOL)rotateButtonHidden
@@ -384,50 +347,6 @@
     }
     
     return resetImage;
-}
-
-+ (UIImage *)clampImage
-{
-    UIImage *clampImage = nil;
-    
-    UIGraphicsBeginImageContextWithOptions((CGSize){22,16}, NO, 0.0f);
-    {
-        //// Color Declarations
-        UIColor* outerBox = [UIColor colorWithRed: 1 green: 1 blue: 1 alpha: 0.553];
-        UIColor* innerBox = [UIColor colorWithRed: 1 green: 1 blue: 1 alpha: 0.773];
-        
-        //// Rectangle Drawing
-        UIBezierPath* rectanglePath = [UIBezierPath bezierPathWithRect: CGRectMake(0, 3, 13, 13)];
-        [UIColor.whiteColor setFill];
-        [rectanglePath fill];
-        
-        
-        //// Outer
-        {
-            //// Top Drawing
-            UIBezierPath* topPath = [UIBezierPath bezierPathWithRect: CGRectMake(0, 0, 22, 2)];
-            [outerBox setFill];
-            [topPath fill];
-            
-            
-            //// Side Drawing
-            UIBezierPath* sidePath = [UIBezierPath bezierPathWithRect: CGRectMake(19, 2, 3, 14)];
-            [outerBox setFill];
-            [sidePath fill];
-        }
-        
-        
-        //// Rectangle 2 Drawing
-        UIBezierPath* rectangle2Path = [UIBezierPath bezierPathWithRect: CGRectMake(14, 3, 4, 13)];
-        [innerBox setFill];
-        [rectangle2Path fill];
-        
-        
-        clampImage = UIGraphicsGetImageFromCurrentImageContext();
-    }
-    UIGraphicsEndImageContext();
-    
-    return clampImage;
 }
 
 @end

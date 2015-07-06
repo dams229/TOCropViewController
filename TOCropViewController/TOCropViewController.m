@@ -52,7 +52,6 @@ typedef NS_ENUM(NSInteger, TOCropViewControllerAspectRatio) {
 /* Button callback */
 - (void)cancelButtonTapped;
 - (void)doneButtonTapped;
-- (void)showAspectRatioDialog;
 - (void)resetCropViewLayout;
 - (void)rotateCropView;
 
@@ -96,7 +95,6 @@ typedef NS_ENUM(NSInteger, TOCropViewControllerAspectRatio) {
     self.toolbar.doneButtonTapped =     ^{ [weakSelf doneButtonTapped]; };
     self.toolbar.cancelButtonTapped =   ^{ [weakSelf cancelButtonTapped]; };
     self.toolbar.resetButtonTapped =    ^{ [weakSelf resetCropViewLayout]; };
-    self.toolbar.clampButtonTapped =    ^{ [weakSelf showAspectRatioDialog]; };
     self.toolbar.rotateButtonTapped =   ^{ [weakSelf rotateCropView]; };
     
     self.transitioningDelegate = self;
@@ -122,6 +120,7 @@ typedef NS_ENUM(NSInteger, TOCropViewControllerAspectRatio) {
         [UIView animateWithDuration:0.3f animations:^{ [self setNeedsStatusBarAppearanceUpdate]; }];
         [self.cropView setGridOverlayHidden:NO animated:YES];
     }
+    [self.cropView setAspectLockEnabledWithAspectRatio:CGSizeMake(1.0f, 1.0f) animated:YES];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -245,34 +244,6 @@ typedef NS_ENUM(NSInteger, TOCropViewControllerAspectRatio) {
 }
 
 #pragma mark - Aspect Ratio Handling -
-- (void)showAspectRatioDialog
-{
-    if (self.cropView.aspectLockEnabled) {
-        self.cropView.aspectLockEnabled = NO;
-        self.toolbar.clampButtonGlowing = NO;
-        return;
-    }
-    
-    BOOL verticalCropBox = self.cropView.cropBoxAspectRatioIsPortrait;
-    UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:nil
-                                                             delegate:self
-                                                    cancelButtonTitle:NSLocalizedStringFromTable(@"Cancel", @"TOCropViewControllerLocalizable", nil)
-                                               destructiveButtonTitle:nil
-                                                    otherButtonTitles:NSLocalizedStringFromTable(@"Original", @"TOCropViewControllerLocalizable", nil),
-                                                                      NSLocalizedStringFromTable(@"Square", @"TOCropViewControllerLocalizable", nil),
-                                                                      verticalCropBox ? @"2:3" : @"3:2",
-                                                                      verticalCropBox ? @"3:5" : @"5:3",
-                                                                      verticalCropBox ? @"3:4" : @"4:3",
-                                                                      verticalCropBox ? @"4:5" : @"5:4",
-                                                                      verticalCropBox ? @"5:7" : @"7:5",
-                                                                      verticalCropBox ? @"9:16" : @"16:9",nil];
-    
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
-        [actionSheet showFromRect:self.toolbar.clampButtonFrame inView:self.toolbar animated:YES];
-    else
-        [actionSheet showInView:self.view];
-}
-
 - (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex
 {
     CGSize aspectRatio = CGSizeZero;
